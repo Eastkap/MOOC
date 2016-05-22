@@ -5,6 +5,17 @@
 // Problem Set 6
 //
 
+/* still to improve:
+My focus though will be on the parse() function.
+The query variable isn't being calculated correctly.. Also, when there's no query string, use strcpy to copy the
+blank.
+I recommend using 
+functions like strchr(), strtok() and other functions in string.h 
+library to simplify and clarify your code.
+but you wouldn't have to do that if you'd 
+null terminated your strings correctly. The code doesn't do that
+after you use the strncpy() function*/
+
 // feature test macro requirements
 #define _GNU_SOURCE
 #define _XOPEN_SOURCE 700
@@ -507,7 +518,7 @@ void interpret(const char* path, const char* query)
         error(500);
         return;
     }
-    printf("\n aa: %s \n",command);
+    //printf("\n aa: %s \n",command);
     FILE* file = popen(command, "r");
     if (file == NULL)
     {
@@ -680,7 +691,7 @@ void lstring(char* s){
 }
 const char* lookup(const char* path)
 {
-    printf("%s",path);
+    //printf("%s",path);
     int i=0;
     int len=strlen(path);
     char p[len];
@@ -732,9 +743,10 @@ bool parse(const char* line, char* abs_path, char* query)
     int i=0,lst=strlen(line),sp1,sp2,ip=0,k;
     //we must find 2 spaces and CRLF in line
     int spacecount=0;
-    for(k=0;k<LimitRequestLine+1;k++){
+    /*for(k=0;k<LimitRequestLine+1;k++){
         abs_path[k]='\000';
-    }
+    }*/
+    memset(abs_path,'\000',LimitRequestLine);
     for(k=0;k<lst;k++){
         if(line[k]==' '){
             if(spacecount==0){
@@ -793,14 +805,15 @@ bool parse(const char* line, char* abs_path, char* query)
     //printf("\n a:-%s\n",abs_path);
     if(ip!=0 && ip!=sp2-1){
         strncpy(abs_path,line+sp1+1,ip-sp1-1);
-       strncpy(query,line+ip,sp2-ip);
-        if(strncmp(abs_path,line+sp1+1,ip-sp1-1)==0 && strncmp(query,line+ip,sp2-ip)==0){
+       strncpy(query,line+ip+1,sp2-ip-1);
+       //printf("\n query: %s \n",query);
+        if(strncmp(abs_path,line+sp1+1,ip-sp1-1)==0 && strncmp(query,line+ip+1,sp2-ip-1)==0){
             return true;
         } 
     }
     else{
         strncpy(abs_path,line+sp1+1,sp2-sp1-1);
-        query="";
+        query[0]='\0';
         if(strncmp(abs_path,line+sp1+1,sp2-sp1-1)==0){
             return true;
         }
